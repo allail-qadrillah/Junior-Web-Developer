@@ -13,7 +13,12 @@
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">Inventaris</a>
             <div class="navbar-nav">
+                {% if session['role'] %}
                 <span class="nav-item nav-link">{{ session['role'] }}</span>
+                <a class="nav-item nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                {% else %}
+                <a class="nav-item nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                {% endif %}
             </div>
         </div>
     </nav>
