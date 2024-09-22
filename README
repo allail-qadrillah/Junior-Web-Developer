@@ -36,6 +36,19 @@ Aplikasi Inventaris adalah aplikasi berbasis web yang digunakan untuk mengelola 
     python run.py
     ```
 
+4. Akses Aplikasi:
+    - copy url aplikasi dari terminal pada browser
+    - pilih role login 
+        1. Cashier
+            - username = cashier
+            - password = cashier
+        2. Admin Gudang
+            - username = admingudang
+            - password = admingudang
+        3. Super Admin
+            - username = superadmin
+            - password = superadmin
+
 ## Struktur Direktori Aplikasi
 
 - `app/`
