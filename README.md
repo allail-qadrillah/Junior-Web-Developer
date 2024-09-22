@@ -19,24 +19,30 @@ Aplikasi Inventaris adalah aplikasi berbasis web yang digunakan untuk mengelola 
 
 ## Instalasi
 
-1. Buat dan aktifkan virtual environment:
+1. Clone repositories ini
+    ```bash
+    git clone https://github.com/allail-qadrillah/Junior-Web-Developer.git
+    cd Junior-Web-Developer
+    ```
+
+2. Buat dan aktifkan virtual environment:
     ```bash
     python -m venv env
     source env/bin/activate  # Untuk pengguna Unix
     .\env\Scripts\activate  # Untuk pengguna Windows
     ```
 
-2. Instal dependensi:
+3. Instal dependensi:
     ```bash
     pip install -r requirements.txt
     ```
 
-3. Jalankan aplikasi:
+4. Jalankan aplikasi:
     ```bash
     python run.py
     ```
 
-4. Akses Aplikasi:
+5. Akses Aplikasi:
     - copy url aplikasi dari terminal pada browser
     - pilih role login 
         1. Cashier
