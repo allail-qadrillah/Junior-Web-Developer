@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Edit Barang</h1>
+<form method="POST" action="{{ url_for('form.edit_product', product_id=product.product_id) }}">
+  <div class="mb-3">
+    <label for="name" class="form-label">Nama</label>
+    <input type="text" class="form-control" id="name" name="name" value="{{ product.name }}" required>
+  </div>
+  <div class="mb-3">
+    <label for="category" class="form-label">Kategori</label>
+    <input type="text" class="form-control" id="category" name="category" value="{{ product.category }}" required>
+  </div>
+  <div class="mb-3">
+    <label for="sell_price" class="form-label">Harga Jual</label>
+    <input type="number" class="form-control" id="sell_price" name="sell_price" value="{{ product.sell_price }}"
+      required>
+  </div>
+  <div class="mb-3">
+    <label for="buy_price" class="form-label">Harga Beli</label>
+    <input type="number" class="form-control" id="buy_price" name="buy_price" value="{{ product.buy_price }}" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+</form>
+<a href="{{ url_for('main.products') }}" class="btn btn-secondary mt-3">Kembali ke Daftar Barang</a>
+{% endblock %}

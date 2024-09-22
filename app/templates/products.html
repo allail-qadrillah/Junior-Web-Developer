@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Daftar Barang dan Item</h1>
+<div class="mt-3 d-flex justify-content-end gap-2">
+    {% if role == 'Cashier' %}
+    <a class="btn btn-warning">Kurangi Barang</a>
+    {% endif %}
+    {% if role in ['Admin Gudang', 'Super Admin'] %}
+    <a href="{{ url_for('form.add_product') }}" class="btn btn-success">Tambah Barang</a>
+    <a href="{{ url_for('form.reduce_product') }}" class="btn btn-warning">Kurangi Barang</a>
+    {% endif %}
+    <a href="{{ url_for('main.generate_report') }}" class="btn btn-primary">Buat Laporan Mingguan</a>
+</div>
+<div class="mt-3">
+    <form method="GET" action="{{ url_for('main.products') }}">
+        <div class="mb-3">
+            <label for="category" class="form-label">Filter Kategori</label>
+            <select class="form-control" id="category" name="category" onchange="this.form.submit()">
+                <option value="">Semua Kategori</option>
+                {% for category in all_category %}
+                <option value="{{ category }}" {% if selected_category==category %}selected{% endif %}>
+                    {{category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nama Barang</th>
+            <th>Kategori</th>
+            <th>Kuantitas</th>
+            <th>Harga Jual</th>
+            <th>Harga Beli</th>
+            {% if role == 'Super Admin' %}
+            <th>Aksi</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>
+                <a href="{{ url_for('main.items', product_id=product.product_id) }}" target="_blank">{{ product.name
+                    }}</a>
+            </td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.item_count }}</td>
+            <td>Rp {{ product.sell_price }}</td>
+            <td>Rp {{ product.buy_price }}</td>
+            <td>
+                {% if role == 'Super Admin' %}
+                <a href="{{ url_for('form.edit_product', product_id=product.product_id) }}"
+                    class="btn btn-sm btn-info">Edit</a>
+                <a href="{{ url_for('form.delete_product', product_id=product.product_id) }}"
+                    class="btn btn-sm btn-danger"
+                    onclick="return confirm('Apakah Anda yakin ingin menghapus barang ini?');">
+                    Hapus
+                </a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

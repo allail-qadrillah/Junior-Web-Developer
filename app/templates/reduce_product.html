@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Kurangi Barang</h1>
+<form method="POST" enctype="multipart/form-data" action="{{ url_for('form.reduce_product') }}">
+  <div class="mb-3">
+    <label for="product_id" class="form-label">Nama Barang</label>
+    <select class="form-control" id="product_id" name="product_id" required>
+      {% for product in products %}
+      <option value="{{ product.product_id }}">{{ product.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="quantity" class="form-label">Jumlah Dikurangi</label>
+    <input type="number" class="form-control" id="quantity" name="quantity" required>
+  </div>
+  <div class="mb-3">
+    <label for="status" class="form-label">Status</label>
+    <select class="form-control" id="status" name="status" required>
+      <option value="sold">Sold</option>
+      <option value="expire">Expire</option>
+      <option value="broken">Broken</option>
+    </select>
+  </div>
+  <div class="mb-3" id="purchase_receipt_div" style="display: none;">
+    <label for="purchase_receipt" class="form-label">Struk Penjualan</label>
+    <input type="file" class="form-control" id="purchase_receipt" name="purchase_receipt">
+  </div>
+  <button type="submit" class="btn btn-primary">Kurangi Barang</button>
+</form>
+<a href="{{ url_for('main.products') }}" class="btn btn-secondary mt-3">Kembali ke Daftar Barang</a>
+
+<script>
+  document.getElementById('status').addEventListener('change', function () {
+    var purchaseReceiptDiv = document.getElementById('purchase_receipt_div');
+    if (this.value === 'sold') {
+      purchaseReceiptDiv.style.display = 'block';
+    } else {
+      purchaseReceiptDiv.style.display = 'none';
+    }
+  });
+</script>
+{% endblock %}

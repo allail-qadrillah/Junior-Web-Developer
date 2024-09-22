@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Detail Barang: {{ product.name }}</h1>
+<a href="{{ url_for('main.products') }}" class="btn btn-secondary mt-3">Kembali ke Daftar Barang</a>
+<div class="card mt-2">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('main.items', product_id=product.product_id) }}">
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="status" class="form-label">Filter Status</label>
+                    <select class="form-control" id="status" name="status" onchange="this.form.submit()">
+                        <option value="">Semua Status</option>
+                        <option value="available" {% if selected_status=='available' %}selected{% endif %}>Available
+                        </option>
+                        <option value="sold" {% if selected_status=='sold' %}selected{% endif %}>Sold</option>
+                        <option value="expire" {% if selected_status=='expire' %}selected{% endif %}>Expire</option>
+                        <option value="broken" {% if selected_status=='broken' %}selected{% endif %}>Broken</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label for="start_date" class="form-label">Tanggal Mulai</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}"
+                        onchange="this.form.submit()">
+                </div>
+                <div class="col">
+                    <label for="end_date" class="form-label">Tanggal Akhir</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}"
+                        onchange="this.form.submit()">
+                </div>
+            </div>
+        </form>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Waktu Masuk</th>
+                    <th>Waktu Keluar</th>
+                    <th>Status</th>
+                    <th>Struk Pembelian</th>
+                    <th>Struk Penjualan</th>
+                </tr>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.entry_date }}</td>
+                    <td>{{ item.exit_date }}</td>
+                    <td>{{ item.status }}</td>
+                    <td>
+                        <a href="{{ item.sales_receipt }}">Link Pembelian</a>
+                    </td>
+                    <td>
+                        {% if item.purchase_receipt == None %}
+                        <p>None</p>
+                        {% else %}
+                        <a href="{{ item.purchase_receipt }}">Link Penjualan</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
