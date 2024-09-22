@@ -97,48 +97,6 @@ def items(product_id):
                            role=session['role'])
 
 
-#* Route endpoint displaying add profuct form
-@main.route('/products/add', methods=['GET'])
-def add_product_form():
-    '''
-    Render the template for adding a new product if the user has the required role.
-    If the user is not authenticated or does not have the necessary role, redirect to the main index page.
-    '''
-    return render_template('add_product.html')
-
-#* Route endpoint adding product
-@main.route('/products/add', methods=['POST'])
-def add_product():
-    '''
-    Add a new product to the database based on the form data received via POST request.
-    Save the sales receipt file if provided and store its URL. Redirect to the products page after adding the product.
-    
-    Returns:
-    Redirect to the products page after adding the product.
-    '''
-    # Get form data
-    name = request.form['name']
-    quantity = request.form['quantity']
-    category = request.form['category']
-    sell_price = request.form['sell_price']
-    buy_price = request.form['buy_price']
-    sales_receipt = request.files['sales_receipt']
-
-    # Save sales receipt file and store its URL
-    if sales_receipt:
-        filename = secure_filename(sales_receipt.filename)
-        upload_path = os.path.join('app/static/uploads', filename)
-        sales_receipt.save(upload_path)
-        sales_receipt_url = url_for('static', filename='uploads/' + filename)
-    else:
-        sales_receipt_url = None
-
-    # Add product to the database
-    DatabaseManager.add_product(
-        name, category, quantity, sell_price, buy_price, sales_receipt_url)
-    # Redirect to the products page
-    return redirect(url_for('main.products'))
-
 # * Route Generate weekly report
 @main.route("/products/report")
 def generate_report():
@@ -148,11 +106,11 @@ def generate_report():
     
     Returns the generated PDF file as an attachment for download.
     """
-    # initialize start and end date for the last week
+    # initialize end date as today and start date as 3 months ago
     end_date = datetime.utcnow()
-    start_date = end_date - timedelta(days=7)
+    start_date = end_date - timedelta(days=90)
 
-    # Get products and items within the last week
+    # Get products and items within the last 3 months
     products = Product.query.all()
     items = Item.query.filter(
         Item.entry_date >= start_date, Item.entry_date <= end_date).all()
@@ -163,31 +121,50 @@ def generate_report():
     elements = []
 
     # Header
-    elements.append(Table([["Laporan Mingguan Produk dan Item"]], colWidths=[500]))
-    elements.append(Table([[f"Periode: {start_date.strftime('%Y-%m-%d')} - {end_date.strftime('%Y-%m-%d')}"]], colWidths=[500]))
+    elements.append(
+        Table([["Laporan Mingguan Produk dan Item"]], colWidths=[500]))
 
-    # get data from products and items
-    data = [["Produk", "Kategori", "Harga Jual", "Harga Beli", "Item ID", "Status", "Tanggal Masuk", "Tanggal Keluar"]]
-    for product in products:
+    # Group items by week
+    grouped_items = {}
+    for item in items:
+        week_start = item.entry_date - \
+            timedelta(days=item.entry_date.weekday())
+        week_end = week_start + timedelta(days=6)
+        week_key = (week_start.strftime('%Y-%m-%d'),
+                    week_end.strftime('%Y-%m-%d'))
+        if week_key not in grouped_items:
+            grouped_items[week_key] = []
+        grouped_items[week_key].append(item)
+
+    # Create a table for each week
+    for week, items in grouped_items.items():
+        elements.append(
+            Table([[f"Periode: {week[0]} - {week[1]}"]], colWidths=[500]))
+        data = [["Produk", "Kategori", "Harga Jual", "Harga Beli",
+                 "Item ID", "Status", "Tanggal Masuk", "Tanggal Keluar"]]
         for item in items:
-            if item.product_id == product.product_id:
+            product = next(
+                (p for p in products if p.product_id == item.product_id), None)
+            if product:
                 data.append([
                     product.name, product.category, product.sell_price, product.buy_price,
-                    item.item_id, item.status, item.entry_date, item.exit_date
+                    item.item_id, item.status, item.entry_date.strftime(
+                        '%d-%B-%Y %H:%M'),
+                    item.exit_date.strftime(
+                        '%d-%B-%Y %H:%M') if item.exit_date else 'None'
                 ])
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        elements.append(table)
 
-    # create table and style
-    table = Table(data)
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-    ]))
-    elements.append(table)
     doc.build(elements)
 
     # Return the generated PDF file as an attachment for download

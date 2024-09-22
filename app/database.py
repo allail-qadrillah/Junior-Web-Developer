@@ -15,7 +15,7 @@ class DatabaseManager:
         reduce_item_quantity: Reduce the quantity of available items for a product.
     """
     @staticmethod
-    def add_product(name: str, category: str, quantity: int, sell_price: float, buy_price: float, sales_receipt: str):
+    def add_product(name: str, category: str, quantity: int, sell_price: float, buy_price: float, sales_receipt: str, entry_date: str):
         '''
         Add a new product or update an existing one with items.
 
@@ -26,10 +26,12 @@ class DatabaseManager:
             sell_price (float): The selling price of the product.
             buy_price (float): The buying price of the product.
             sales_receipt (str): The sales receipt associated with the item.
+            entry_date (str): The date and time when the product was added.
 
         Returns:
             Product: The existing product if updated, or the new product added with items.
         '''
+        entry_date = datetime.strptime(entry_date, '%Y-%m-%dT%H:%M')
         # check if the product already exists
         existing_product = Product.query.filter_by(
             name=name, category=category, sell_price=sell_price, buy_price=buy_price).first()
@@ -38,7 +40,7 @@ class DatabaseManager:
         if existing_product:
             for _ in range(int(quantity)):
                 new_item = Item(product_id=existing_product.product_id,
-                                status='available', sales_receipt=sales_receipt)
+                                status='available', sales_receipt=sales_receipt, entry_date=entry_date)
                 db.session.add(new_item)
         # if the product does not exist, create a new product
         else:
@@ -50,7 +52,7 @@ class DatabaseManager:
             # add item for the new product based on the quantity
             for _ in range(int(quantity)):
                 new_item = Item(product_id=new_product.product_id,
-                                status='available', sales_receipt=sales_receipt)
+                                status='available', sales_receipt=sales_receipt, entry_date=entry_date)
                 db.session.add(new_item)
 
         # commit the changes to the database
@@ -136,7 +138,7 @@ class DatabaseManager:
         return False
 
     @staticmethod
-    def reduce_item_quantity(product_id:int, quantity:int, status:str, purchase_receipt:str=None):
+    def reduce_item_quantity(product_id:int, quantity:int, status:str, exit_date:str, purchase_receipt:str=None):
         '''
         Reduce the quantity of available items for a product.
 
@@ -148,9 +150,10 @@ class DatabaseManager:
 
         '''
         items = Item.query.filter_by(product_id=product_id, status='available').limit(quantity).all()
+    
         for item in items:
             item.status = status
-            item.exit_date = datetime.utcnow()
+            item.exit_date = datetime.strptime(exit_date, '%Y-%m-%dT%H:%M')
             if status == 'sold':
                 item.purchase_receipt = purchase_receipt
         db.session.commit()

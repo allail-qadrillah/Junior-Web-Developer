@@ -42,8 +42,12 @@
             <tbody>
                 {% for item in items %}
                 <tr>
-                    <td>{{ item.entry_date }}</td>
-                    <td>{{ item.exit_date }}</td>
+                    <td>{{ item.entry_date.strftime('%d-%B-%Y %H:%M') }}</td>
+                    {% if item.exit_date %}
+                    <td>{{ item.exit_date.strftime('%d-%B-%Y %H:%M') }}</td>
+                    {% else %}
+                    <td>None</td>
+                    {% endif %}
                     <td>{{ item.status }}</td>
                     <td>
                         <a href="{{ item.sales_receipt }}">Link Pembelian</a>

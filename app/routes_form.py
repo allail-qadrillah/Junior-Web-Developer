@@ -12,7 +12,7 @@ import os
 form = Blueprint('form', __name__)
 
 # * Route endpoint add product form
-@form.route('/product/add', methods=['GET'])
+@form.route('/product/add', methods=['GET', 'POST'])
 def add_product():
     '''
     Route to add a new product to the database if the request method is POST. 
@@ -31,8 +31,9 @@ def add_product():
         category = request.form['category']
         sell_price = request.form['sell_price']
         buy_price = request.form['buy_price']
+        entry_date = request.form['entry_date']
         sales_receipt = request.files['sales_receipt']
-        
+        print(entry_date)
         # Save sales receipt file and store its URL
         if sales_receipt:
             filename = secure_filename(sales_receipt.filename)
@@ -45,7 +46,7 @@ def add_product():
 
         # Add product to the database and redirect to the products page
         DatabaseManager.add_product(
-            name, category, quantity, sell_price, buy_price, sales_receipt_url)
+            name, category, quantity, sell_price, buy_price, sales_receipt_url, entry_date)
         return redirect(url_for('main.products'))
     
     # Render the 'add_product.html' template if the request method is GET
@@ -70,6 +71,7 @@ def reduce_product():
         quantity = int(request.form['quantity'])
         status = request.form['status']
         purchase_receipt = request.files.get('purchase_receipt')
+        exit_date = request.form['exit_date'] 
 
         # Save purchase receipt file and store its URL
         if status == 'sold' and purchase_receipt:
@@ -83,7 +85,7 @@ def reduce_product():
 
         # Reduce item quantity in the database and redirect to the products page
         DatabaseManager.reduce_item_quantity(
-            product_id, quantity, status, purchase_receipt_url)
+            product_id, quantity, status, exit_date, purchase_receipt_url)
         return redirect(url_for('main.products'))
 
     # Retrieve all products from the database and render the 'reduce_product.html' template
